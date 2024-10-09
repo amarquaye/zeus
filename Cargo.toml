@@ -2,6 +2,14 @@
 name = "zeus"
 version = "1.0.0"
 edition = "2021"
+authors = ["Jesse Amarquaye <engineeramarquaye@gmail.com>"]
+license = "MIT"
+description = "Command-line utility to mimic some essential Unix/Linux commands. Written in rust 🦀."
+readme = "README.md"
+homepage = "https://github.com/amarquaye/zeus"
+repository = "https://github.com/amarquaye/zeus"
+keywords = ["cli", "utility", "tool", "linux", "terminal"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.5.18", features = ["cargo", "derive"] }
