@@ -24,6 +24,11 @@ enum Commands {
         /// Directory to create.
         dir: Vec<path::PathBuf>,
     },
+    /// Remove empty directory/folder.
+    Rmdir {
+        /// Directory to remove.
+        dir: Vec<path::PathBuf>,
+    },
 }
 
 fn main() {
@@ -46,6 +51,12 @@ fn main() {
             for d in dir {
                 // Create directories
                 fs::create_dir_all(d).expect("Failed to create directory!");
+            }
+        }
+        Some(Commands::Rmdir { dir }) => {
+            for d in dir {
+                // Remove directories.
+                fs::remove_dir(d).expect("Cannot remove directory!");
             }
         }
         None => {
