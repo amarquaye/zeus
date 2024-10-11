@@ -14,21 +14,25 @@ enum Commands {
     /// Create an empty file if it does not exist.
     Create {
         /// File to create.
+        #[arg(required = true)]
         file: Vec<path::PathBuf>,
     },
     /// Remove file.
     Rm {
         /// File to remove.
+        #[arg(required = true)]
         file: Vec<path::PathBuf>,
     },
     /// Create an empty directory/folder.
     Mkdir {
         /// Directory to create.
+        #[arg(required = true)]
         dir: Vec<path::PathBuf>,
     },
     /// Remove empty directory/folder.
     Rmdir {
         /// Directory to remove.
+        #[arg(required = true)]
         dir: Vec<path::PathBuf>,
     },
 }
