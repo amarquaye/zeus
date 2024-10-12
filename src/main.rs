@@ -1,7 +1,13 @@
 use clap::{Parser, Subcommand};
 use std::{fs, path};
 
-/// Command-line utility to mimic some essential Unix/Linux commands. Written in rust 🦀.
+/// Command-line utility to mimic some Unix/Linux commands. Written in rust 🦀.
+///
+/// Zeus is a tool that is being written as I learn the rust programming language.
+/// Rust is a great systems programming language for writing cli applications.
+/// Commands in zeus are on par with(in terms of execution speed) and surprisingly faster in some cases than the default commands written in C.
+///
+/// Developed by Jesse Amarquaye.
 #[derive(Parser)]
 #[command(author, version, about)]
 struct Cli {
@@ -11,30 +17,36 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Create an empty file if it does not exist.
+    /// Create the FILE(s), if they do not already exist.
     Create {
-        /// File to create.
+        /// FILE(s) to create.
         #[arg(required = true)]
         file: Vec<path::PathBuf>,
     },
-    /// Remove file.
+    /// Remove (unlink) the FILE(s).
     Rm {
-        /// File to remove.
+        /// FILE(s) to remove.
         #[arg(required = true)]
         file: Vec<path::PathBuf>,
     },
-    /// Create an empty directory/folder.
+    /// Create the DIRECTORY(ies), if they do not already exist.
     Mkdir {
-        /// Directory to create.
+        /// DIRECTORY(ies) to create.
         #[arg(required = true)]
         dir: Vec<path::PathBuf>,
     },
-    /// Remove empty directory/folder.
+    /// Remove the DIRECTORY(ies), if they are empty.
     Rmdir {
-        /// Directory to remove.
+        /// DIRECTORY(ies) to remove.
         #[arg(required = true)]
         dir: Vec<path::PathBuf>,
     },
+    /// Display file or file system status.
+    Stat {
+        /// File or file system to display status. 
+        #[arg(required = true)]
+        file: Vec<path::PathBuf>,
+    }
 }
 
 fn main() {
@@ -63,6 +75,13 @@ fn main() {
             for d in dir {
                 // Remove directories.
                 fs::remove_dir(d).expect("Failed to remove directory!");
+            }
+        }
+        Some(Commands::Stat { file }) => {
+            for f in file {
+                // Display the stats for a given file or directory
+                let stats = fs::metadata(f).expect("Cannot get stats!");
+                println!("{:#?}\n", stats);
             }
         }
         None => {
