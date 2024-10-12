@@ -3,7 +3,7 @@ use std::{fs, path};
 
 /// Command-line utility to mimic some essential Unix/Linux commands. Written in rust 🦀.
 #[derive(Parser)]
-#[command(version)]
+#[command(author, version, about)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,

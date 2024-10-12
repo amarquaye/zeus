@@ -12,4 +12,4 @@ keywords = ["cli", "utility", "tool", "linux", "terminal"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-clap = { version = "4.5.18", features = ["cargo", "derive"] }
+clap = { version = "4.5.18", features = ["cargo", "derive", "unicode", "wrap_help"] }
