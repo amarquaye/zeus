@@ -14,6 +14,9 @@ use std::{fs, path};
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
+
+    #[command(flatten)]
+    verbose: clap_verbosity_flag::Verbosity,
 }
 
 #[derive(Subcommand)]
