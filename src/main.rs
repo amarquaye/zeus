@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use std::{fs, path};
 
@@ -49,43 +50,49 @@ enum Commands {
     }
 }
 
-fn main() {
+fn main() -> Result<()> {
     let args = Cli::parse();
 
     match &args.command {
         Some(Commands::Create { file }) => {
             for f in file {
                 // Create files.
-                fs::File::create_new(f).expect("Failed to create file!");
+                fs::File::create_new(f).with_context(|| format!("Failed to create file: {:?}", f))?;
             }
+            Ok(())
         }
         Some(Commands::Rm { file }) => {
             for f in file {
                 // Remove files.
-                fs::remove_file(f).expect("Failed to remove file!");
+                fs::remove_file(f).with_context(|| format!("Failed to remove file: {:?}", f))?;
             }
+            Ok(())
         }
         Some(Commands::Mkdir { dir }) => {
             for d in dir {
                 // Create directories
-                fs::create_dir_all(d).expect("Failed to create directory!");
+                fs::create_dir_all(d).with_context(|| format!("Failed to create directory: {:?}", d))?;
             }
+            Ok(())
         }
         Some(Commands::Rmdir { dir }) => {
             for d in dir {
                 // Remove directories.
-                fs::remove_dir(d).expect("Failed to remove directory!");
+                fs::remove_dir(d).with_context(|| format!("Failed to remove directory: {:?}", d))?;
             }
+            Ok(())
         }
         Some(Commands::Stat { file }) => {
             for f in file {
                 // Display the stats for a given file or directory
-                let stats = fs::metadata(f).expect("Cannot get stats!");
+                let stats = fs::metadata(f).with_context(|| format!("Cannot get stats for {:?}", f))?;
                 println!("{:#?}\n", stats);
             }
+            Ok(())
         }
         None => {
             println!("zeus: missing command operand!\nTry 'zeus --help' for more information.");
+            Ok(())
         }
     }
 }
