@@ -1,6 +1,6 @@
 [package]
 name = "zeus"
-version = "1.0.1"
+version = "1.1.0"
 edition = "2021"
 authors = ["Jesse Amarquaye <engineeramarquaye@gmail.com>"]
 license = "MIT"

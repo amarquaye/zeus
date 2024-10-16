@@ -27,6 +27,12 @@ enum Commands {
         #[arg(required = true)]
         file: Vec<path::PathBuf>,
     },
+    /// Concatenate FILE(s) to standard output.
+    Cat {
+        /// FILE(s) to concatenate.
+        #[arg(required = true)]
+        file: Vec<path::PathBuf>,
+    },
     /// Remove (unlink) the FILE(s).
     ///
     /// By default, rm does not remove directories.  Use the --recursive (-r)
@@ -75,6 +81,16 @@ fn main() -> Result<()> {
             for f in file {
                 // Create files.
                 fs::File::create_new(f).with_context(|| format!("Failed to create file: {:?}", f))?;
+            }
+            Ok(())
+        }
+        Some(Commands::Cat { file }) => {
+            // Display file content.
+            for f in file {
+                let f = fs::read_to_string(f)?;
+                for line in f.lines() {
+                    println!("{}", line);
+                }
             }
             Ok(())
         }
