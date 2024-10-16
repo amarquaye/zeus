@@ -28,10 +28,24 @@ enum Commands {
         file: Vec<path::PathBuf>,
     },
     /// Remove (unlink) the FILE(s).
+    ///
+    /// By default, rm does not remove directories.  Use the --recursive (-r)
+    /// option to remove each listed directory, too, along with all of its contents.
+    ///
+    /// To remove a file whose name starts with a '-', for example '-bar',
+    /// use one of these commands:
+    ///
+    /// rm -- -bar
+    ///
+    /// rm ./-bar
     Rm {
         /// FILE(s) to remove.
         #[arg(required = true)]
         file: Vec<path::PathBuf>,
+
+        /// Remove DIRECTORIES and their contents recursively.
+        #[arg(short = 'r', long = "recursive")]
+        recursive: bool,
     },
     /// Create the DIRECTORY(ies), if they do not already exist.
     Mkdir {
@@ -64,10 +78,14 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
-        Some(Commands::Rm { file }) => {
+        Some(Commands::Rm { file, recursive }) => {
+            // Remove files.
             for f in file {
-                // Remove files.
-                fs::remove_file(f).with_context(|| format!("Failed to remove file: {:?}", f))?;
+                if *recursive && fs::metadata(f)?.is_dir() {
+                    fs::remove_dir_all(f).with_context(|| format!("Failed to remove directory recursively: {:?}", f))?;
+                } else {
+                    fs::remove_file(f).with_context(|| format!("Failed to remove file: {:?}", f))?;
+                }
             }
             Ok(())
         }
