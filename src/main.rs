@@ -21,17 +21,32 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Concatenate FILE(s) to standard output.
+    Cat {
+        /// FILE(s) to concatenate.
+        #[arg(required = true)]
+        file: Vec<path::PathBuf>,
+    },
     /// Create the FILE(s), if they do not already exist.
     Create {
         /// FILE(s) to create.
         #[arg(required = true)]
         file: Vec<path::PathBuf>,
     },
-    /// Concatenate FILE(s) to standard output.
-    Cat {
-        /// FILE(s) to concatenate.
+    /// Echo the STRING(s) to standard output.
+    Echo {
+        /// STRING(s) to echo.
+        string: Vec<String>,
+
+        /// Do not output the trailing newline.
+        #[arg(short)]
+        n: bool,
+    },
+    /// Create the DIRECTORY(ies), if they do not already exist.
+    Mkdir {
+        /// DIRECTORY(ies) to create.
         #[arg(required = true)]
-        file: Vec<path::PathBuf>,
+        dir: Vec<path::PathBuf>,
     },
     /// Remove (unlink) the FILE(s).
     ///
@@ -50,14 +65,8 @@ enum Commands {
         file: Vec<path::PathBuf>,
 
         /// Remove DIRECTORIES and their contents recursively.
-        #[arg(short = 'r', long = "recursive")]
+        #[arg(short, long)]
         recursive: bool,
-    },
-    /// Create the DIRECTORY(ies), if they do not already exist.
-    Mkdir {
-        /// DIRECTORY(ies) to create.
-        #[arg(required = true)]
-        dir: Vec<path::PathBuf>,
     },
     /// Remove the DIRECTORY(ies), if they are empty.
     Rmdir {
@@ -70,20 +79,13 @@ enum Commands {
         /// File or file system to display status. 
         #[arg(required = true)]
         file: Vec<path::PathBuf>,
-    }
+    },
 }
 
 fn main() -> Result<()> {
     let args = Cli::parse();
 
     match &args.command {
-        Some(Commands::Create { file }) => {
-            for f in file {
-                // Create files.
-                fs::File::create_new(f).with_context(|| format!("Failed to create file: {:?}", f))?;
-            }
-            Ok(())
-        }
         Some(Commands::Cat { file }) => {
             // Display file content.
             for f in file {
@@ -91,6 +93,34 @@ fn main() -> Result<()> {
                 for line in f.lines() {
                     println!("{}", line);
                 }
+            }
+            Ok(())
+        }
+        Some(Commands::Create { file }) => {
+            // Create files.
+            for f in file {
+                fs::File::create_new(f).with_context(|| format!("Failed to create file: {:?}", f))?;
+            }
+            Ok(())
+        }
+        Some (Commands::Echo { string, n }) => {
+            // Echo strings
+            if *n {
+                for s in string {
+                    print!("{} ", s.trim());
+                }
+            } else {
+                for s in string {
+                    print!("{} ", s.trim());
+                }
+                println!();
+            }
+            Ok(())
+        }
+        Some(Commands::Mkdir { dir }) => {
+            // Create directories
+            for d in dir {
+                fs::create_dir_all(d).with_context(|| format!("Failed to create directory: {:?}", d))?;
             }
             Ok(())
         }
@@ -105,23 +135,16 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
-        Some(Commands::Mkdir { dir }) => {
-            for d in dir {
-                // Create directories
-                fs::create_dir_all(d).with_context(|| format!("Failed to create directory: {:?}", d))?;
-            }
-            Ok(())
-        }
         Some(Commands::Rmdir { dir }) => {
+            // Remove directories.
             for d in dir {
-                // Remove directories.
                 fs::remove_dir(d).with_context(|| format!("Failed to remove directory: {:?}", d))?;
             }
             Ok(())
         }
         Some(Commands::Stat { file }) => {
+            // Display the stats for a given file or directory
             for f in file {
-                // Display the stats for a given file or directory
                 let stats = fs::metadata(f).with_context(|| format!("Cannot get stats for {:?}", f))?;
                 println!("{:#?}\n", stats);
             }
