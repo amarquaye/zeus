@@ -42,6 +42,18 @@ enum Commands {
         #[arg(short)]
         n: bool,
     },
+    /// Search for PATTERNS in each FILE.
+    ///
+    /// Example: zeus grep 'hello world' src/main.rs main.py
+    Grep {
+        /// String pattern.
+        #[arg(required = true)]
+        patterns: String,
+
+        /// FILE(s) to search for pattern.
+        #[arg(required = true)]
+        file: Vec<path::PathBuf>,
+    },
     /// Create the DIRECTORY(ies), if they do not already exist.
     Mkdir {
         /// DIRECTORY(ies) to create.
@@ -117,6 +129,20 @@ fn main() -> Result<()> {
             }
             Ok(())
         }
+        Some (Commands::Grep { patterns, file }) => {
+            // Search for patterns
+            for f in file {
+                if f.is_file() {
+                    let contents = fs::read_to_string(f)?;
+                    for (number, line) in contents.lines().enumerate() {
+                        if line.contains(patterns) {
+                            println!("{}: {}", number + 1, line);
+                        }
+                    }
+                }
+            }
+            Ok(())
+        }
         Some(Commands::Mkdir { dir }) => {
             // Create directories
             for d in dir {
@@ -156,3 +182,4 @@ fn main() -> Result<()> {
         }
     }
 }
+
