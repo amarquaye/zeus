@@ -88,7 +88,7 @@ enum Commands {
     },
     /// Display file or file system status.
     Stat {
-        /// File or file system to display status. 
+        /// File or file system to display status.
         #[arg(required = true)]
         file: Vec<path::PathBuf>,
     },
@@ -111,11 +111,12 @@ fn main() -> Result<()> {
         Some(Commands::Create { file }) => {
             // Create files.
             for f in file {
-                fs::File::create_new(f).with_context(|| format!("Failed to create file: {:?}", f))?;
+                fs::File::create_new(f)
+                    .with_context(|| format!("Failed to create file: {:?}", f))?;
             }
             Ok(())
         }
-        Some (Commands::Echo { string, n }) => {
+        Some(Commands::Echo { string, n }) => {
             // Echo strings
             if *n {
                 for s in string {
@@ -128,15 +129,29 @@ fn main() -> Result<()> {
                 println!();
             }
             Ok(())
-        }
-        Some (Commands::Grep { patterns, file }) => {
-            // Search for patterns
+        } // TODO: Add color to patterns that get matched and craete a recursive function to search directories for patterns and display the name of each file that matched.
+        Some(Commands::Grep { patterns, file }) => {
             for f in file {
                 if f.is_file() {
-                    let contents = fs::read_to_string(f)?;
+                    let contents = fs::read_to_string(f).with_context(|| format!("Failed to read the contents of {:?}", f))?;
                     for (number, line) in contents.lines().enumerate() {
                         if line.contains(patterns) {
                             println!("{}: {}", number + 1, line);
+                        }
+                    }
+                } else if f.is_dir() {
+                    if let Ok(entries) = fs::read_dir(f) {
+                        for entry in entries {
+                            if let Ok(entry) = entry {
+                                if entry.path().is_file() {
+                                    let contents = fs::read_to_string(entry.path()).with_context(|| format!("Failed to read the contents of {:?}", entry.path()))?;
+                                    for (number, line) in contents.lines().enumerate() {
+                                        if line.contains(patterns) {
+                                            println!("{}: {}", number + 1, line);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -146,7 +161,8 @@ fn main() -> Result<()> {
         Some(Commands::Mkdir { dir }) => {
             // Create directories
             for d in dir {
-                fs::create_dir_all(d).with_context(|| format!("Failed to create directory: {:?}", d))?;
+                fs::create_dir_all(d)
+                    .with_context(|| format!("Failed to create directory: {:?}", d))?;
             }
             Ok(())
         }
@@ -154,9 +170,12 @@ fn main() -> Result<()> {
             // Remove files.
             for f in file {
                 if *recursive && fs::metadata(f)?.is_dir() {
-                    fs::remove_dir_all(f).with_context(|| format!("Failed to remove directory recursively: {:?}", f))?;
+                    fs::remove_dir_all(f).with_context(|| {
+                        format!("Failed to remove directory recursively: {:?}", f)
+                    })?;
                 } else {
-                    fs::remove_file(f).with_context(|| format!("Failed to remove file: {:?}", f))?;
+                    fs::remove_file(f)
+                        .with_context(|| format!("Failed to remove file: {:?}", f))?;
                 }
             }
             Ok(())
@@ -164,14 +183,16 @@ fn main() -> Result<()> {
         Some(Commands::Rmdir { dir }) => {
             // Remove directories.
             for d in dir {
-                fs::remove_dir(d).with_context(|| format!("Failed to remove directory: {:?}", d))?;
+                fs::remove_dir(d)
+                    .with_context(|| format!("Failed to remove directory: {:?}", d))?;
             }
             Ok(())
         }
         Some(Commands::Stat { file }) => {
             // Display the stats for a given file or directory
             for f in file {
-                let stats = fs::metadata(f).with_context(|| format!("Cannot get stats for {:?}", f))?;
+                let stats =
+                    fs::metadata(f).with_context(|| format!("Cannot get stats for {:?}", f))?;
                 println!("{:#?}\n", stats);
             }
             Ok(())
